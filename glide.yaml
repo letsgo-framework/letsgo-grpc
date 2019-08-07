@@ -1,0 +1,4 @@
+package: github.com/letsgo-framework/letsgo-grpc
+import:
+- package: google.golang.org/grpc
+  version: ~1.22.1
