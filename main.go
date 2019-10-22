@@ -3,28 +3,35 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"github.com/letsgo-framework/letsgo-grpc/services/greetpb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"github.com/letsgo-framework/letsgo-grpc/services/greetpb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 )
 
-type server struct { }
+type server struct{}
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Greetings " + firstName
 	res := &greetpb.GreetResponse{
-		Result:               result,
+		Result: result,
 	}
 	return res, nil
 }
 func main() {
-	grpcServer := grpc.NewServer()
+	creds, err := credentials.NewServerTLSFromFile("./keys/server.crt", "./keys/server.key")
+	if err != nil {
+		log.Fatalf("Failed to generate credentials %v", err)
+	}
+	grpcServer := grpc.NewServer(grpc.Creds(creds))
 	greetpb.RegisterGreetServiceServer(grpcServer, &server{})
 
 	// grpc
